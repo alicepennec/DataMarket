@@ -44,6 +44,10 @@ df.drop_duplicates(inplace=True)
 nb_apres = df.shape[0]
 print(f"\n🧹 Doublons supprimés : {nb_avant - nb_apres}")
 
+# ➤ Indexation des données
+df.reset_index(drop=True, inplace=True)
+df.insert(0, 'product_id', df.index)
+
 # ➤ Export des données nettoyées
 output_path = "./output/decathlon_cleaned.csv"
 df.to_csv(output_path, index=False)

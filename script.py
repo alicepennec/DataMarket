@@ -1,6 +1,8 @@
 import kagglehub
 import pandas as pd
 import os
+from sqlalchemy import create_engine
+import pymysql
 
 # Étape 1 : Téléchargement du dataset
 path = kagglehub.dataset_download("nikhilchadha1537/decathlon-web-scraped")
@@ -52,3 +54,33 @@ df.insert(0, 'product_id', df.index)
 output_path = "./output/decathlon_cleaned.csv"
 df.to_csv(output_path, index=False)
 print(f"\n✅ Données nettoyées exportées dans : {output_path}")
+
+# Création de la base de donnée
+conn = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="root"
+)
+
+with conn.cursor() as cursor:
+    cursor.execute("CREATE DATABASE IF NOT EXISTS decathlon_db;")
+conn.close()
+
+# Connexion via SQLAlchemy à la base créée
+user = "root"
+password = "root"
+host = "localhost"
+port = "3306"
+database = "decathlon_db"
+
+db_url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+
+engine = create_engine(db_url)
+
+# Lire le csv nettoyé
+df = pd.read_csv(output_path)
+
+# Exporter vers MySQL
+df.to_sql(name="products", con=engine, if_exists="replace", index=False)
+
+print("✅ Données insérées dans la base MySQL avec succès !")

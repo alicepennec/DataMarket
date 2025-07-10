@@ -3,6 +3,8 @@ import pandas as pd
 import os
 from sqlalchemy import create_engine
 import pymysql
+import random
+from datetime import datetime, timedelta
 
 # Étape 1 : Téléchargement du dataset
 path = kagglehub.dataset_download("nikhilchadha1537/decathlon-web-scraped")
@@ -45,10 +47,6 @@ nb_avant = df.shape[0]
 df.drop_duplicates(inplace=True)
 nb_apres = df.shape[0]
 print(f"\n🧹 Doublons supprimés : {nb_avant - nb_apres}")
-
-# ➤ Indexation des données
-df.reset_index(drop=True, inplace=True)
-df.insert(0, 'product_id', df.index)
 
 # Création des colonnes à enrichir
 df["categorie"] = ""
@@ -101,11 +99,35 @@ def enrich_row(row):
 # Application de l'enrichissement
 df = df.apply(enrich_row, axis=1)
 
+# ➤ Indexation des données
+df.reset_index(drop=True, inplace=True)
+df.insert(0, 'product_id', df.index)
+
 # Export du fichier enrichi
 output_path = "./output/decathlon_enriched.csv"
 df.to_csv(output_path, index=False)
 
 print(f"✅ Dataset enrichi exporté vers : {output_path}")
+
+## Création du dataset Ventes
+# Génération de données de vente simulées
+product_ids = df["product_id"].tolist()                # Tes IDs de produit enrichis
+clients = [f"c_{i}" for i in range(1, 201)]            # 200 clients fictifs
+
+ventes_data = []
+for _ in range(1000):  # 1000 ventes
+    id_prod = random.choice(product_ids)
+    client_id = random.choice(clients)
+    date = datetime(2021, 1, 1) + timedelta(days=random.randint(0, 730))  # dates entre 2021 et 2023
+    ventes_data.append([id_prod, date, client_id])
+
+ventes_df = pd.DataFrame(ventes_data, columns=["id_prod", "date", "client_id"])
+
+# Export du CSV simulé
+ventes_csv_path = "./output/ventes.csv"
+ventes_df.to_csv(ventes_csv_path, index=False)
+print(f"📦 Fichier ventes simulées exporté : {ventes_csv_path}")
+
 
 # Création de la base de donnée
 conn = pymysql.connect(
@@ -130,9 +152,35 @@ db_url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
 engine = create_engine(db_url)
 
 # Lire le csv nettoyé
-df = pd.read_csv(output_path)
+products_df = pd.read_csv(output_path)
 
 # Exporter vers MySQL
-df.to_sql(name="products", con=engine, if_exists="replace", index=False)
+products_df.to_sql(name="products", con=engine, if_exists="replace", index=False)
 
-print("✅ Données insérées dans la base MySQL avec succès !")
+print("✅ Table 'products' insérée dans la base MySQL avec succès !")
+
+# Lecture du fichier ventes simulées
+ventes_df = pd.read_csv(ventes_csv_path)
+
+# Export dans MySQL dans la table 'ventes'
+ventes_df.to_sql(name="ventes", con=engine, if_exists="replace", index=False)
+print("✅ Table 'ventes' insérée dans la base MySQL avec succès !")
+
+# Lecture du fichier clients
+customers_csv_path = "./input/customers.csv" 
+customers_df = pd.read_csv(customers_csv_path)
+
+# Export du CSV simulé
+customers_csv_output_path = "./output/customers.csv"
+customers_df.to_csv(customers_csv_output_path, index=False)
+print(f"📦 Fichier customers exporté : {customers_csv_output_path}")
+
+# Vérification rapide
+print("\n👤 Aperçu des clients :")
+print(customers_df.head())
+
+# Insertion dans MySQL
+customers_df.to_sql(name="clients", con=engine, if_exists="replace", index=False)
+print("✅ Table 'clients' insérée dans la base MySQL avec succès !")
+
+

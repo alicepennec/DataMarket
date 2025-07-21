@@ -104,7 +104,7 @@ df.reset_index(drop=True, inplace=True)
 df.insert(0, 'product_id', df.index)
 
 # Export du fichier enrichi
-output_path = "./output/decathlon_enriched.csv"
+output_path = "./output/products.csv"
 df.to_csv(output_path, index=False)
 
 print(f"✅ Dataset enrichi exporté vers : {output_path}")

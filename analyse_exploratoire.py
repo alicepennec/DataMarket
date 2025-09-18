@@ -4,7 +4,7 @@ import os
 # Récupération des 3 tables cibles
 customers_path = './output/customers.csv'
 products_path = './output/products.csv'
-ventes_path = './ventes.csv'
+ventes_path = './output/ventes.csv'
 
 customers_df = pd.read_csv(customers_path)
 products_df = pd.read_csv(products_path)

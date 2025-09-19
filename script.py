@@ -25,6 +25,7 @@ print(df.info())
 # Suppression des colonnes inutiles (si présentes)
 columns_to_drop = [col for col in df.columns if "Unnamed" in col]
 df.drop(columns=columns_to_drop, inplace=True)
+df.drop(columns=['MRP', 'number_of_reviews', 'product information', 'description'], inplace=True)
 
 # Renommage standardisé (au cas où)
 df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")

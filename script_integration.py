@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from sqlalchemy import create_engine
 import pymysql
+from dotenv import load_dotenv
 
 # ===============================
 # Chemins vers les fichiers CSV
@@ -13,10 +14,18 @@ ventes_path = './output/ventes.csv'
 # ===============================
 # Création de la base de données
 # ===============================
+load_dotenv()
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+
 conn = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="root"
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASSWORD
 )
 
 with conn.cursor() as cursor:
@@ -35,7 +44,7 @@ with conn.cursor() as cursor:
     # Table Produits
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS produits (
-        ProduitID INT PRIMARY KEY,
+        ProduitID INT PRIMARY KEY AUTO_INCREMENT,
         Url VARCHAR(500),
         Nom VARCHAR(500),
         Marque VARCHAR(100),
@@ -65,13 +74,8 @@ conn.close()
 # ===============================
 # Connexion SQLAlchemy
 # ===============================
-user = "root"
-password = "root"
-host = "localhost"
-port = "3306"
-database = "decathlon_db"
 
-db_url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+db_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 engine = create_engine(db_url)
 
 # ===============================

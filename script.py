@@ -102,7 +102,6 @@ df = df.apply(enrich_row, axis=1)
 
 # Indexation des données
 df.reset_index(drop=True, inplace=True)
-df.insert(0, 'product_id', df.index)
 
 # Export du fichier enrichi
 output_path = "./output/products.csv"
@@ -120,8 +119,8 @@ customers_df.to_csv(customers_csv_output_path, index=False)
 
 # Etape 6 : Création du dataset Ventes
 # Génération de données de vente simulées
-product_ids = df["product_id"].tolist()                # Tes IDs de produit enrichis
-clients = [f"c_{i}" for i in range(1, 201)]            # 200 clients fictifs
+product_ids = list(range(1, len(df) + 1))
+clients = [f"c_{i}" for i in range(1, 201)]
 
 ventes_data = []
 for _ in range(1000):  # 1000 ventes

@@ -1,9 +1,19 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
 # --- Connexion MySQL ---
-DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/decathlon_db"
+DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -23,7 +33,7 @@ class Client(Base):
 class Produit(Base):
     __tablename__ = "produits"
 
-    ProduitID = Column(Integer, primary_key=True)
+    ProduitID = Column(Integer, primary_key=True, index=True, autoincrement=True) 
     Nom = Column(String(500))
     Marque = Column(String(100))
     Prix = Column(Float)

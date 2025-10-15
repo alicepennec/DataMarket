@@ -1,0 +1,24 @@
+2025-10-15 10:23:58,279 - INFO - Produits listés
+2025-10-15 10:24:35,167 - INFO - Produits listés
+2025-10-15 11:51:42,017 - INFO - Produits listés avec succès
+2025-10-15 11:51:44,567 - INFO - Produits listés avec succès
+2025-10-15 11:55:07,001 - ERROR - Erreur lors de la création du produit: (pymysql.err.OperationalError) (1364, "Field 'ProduitID' doesn't have a default value")
+[SQL: INSERT INTO produits (`Nom`, `Marque`, `Prix`, `Couleur`, `Categorie`, `SousCategorie`, `Pratique`) VALUES (%(Nom)s, %(Marque)s, %(Prix)s, %(Couleur)s, %(Categorie)s, %(SousCategorie)s, %(Pratique)s)]
+[parameters: {'Nom': 'TestProduit', 'Marque': 'Picture', 'Prix': 10.99, 'Couleur': 'noir', 'Categorie': 'Vêtements', 'SousCategorie': 'Pantalon', 'Pratique': 'Randonnée'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-15 11:57:32,810 - INFO - Produits listés avec succès
+2025-10-15 11:58:00,535 - ERROR - Erreur lors de la création du produit: (pymysql.err.OperationalError) (1364, "Field 'ProduitID' doesn't have a default value")
+[SQL: INSERT INTO produits (`Nom`, `Marque`, `Prix`, `Couleur`, `Categorie`, `SousCategorie`, `Pratique`) VALUES (%(Nom)s, %(Marque)s, %(Prix)s, %(Couleur)s, %(Categorie)s, %(SousCategorie)s, %(Pratique)s)]
+[parameters: {'Nom': 'TestProduit', 'Marque': 'Picture', 'Prix': 10.99, 'Couleur': 'noir', 'Categorie': 'Vêtements', 'SousCategorie': 'Pantalon', 'Pratique': 'Randonnée'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-15 11:58:43,082 - ERROR - Erreur lors de la création du produit: (pymysql.err.OperationalError) (1364, "Field 'ProduitID' doesn't have a default value")
+[SQL: INSERT INTO produits (`Nom`, `Marque`, `Prix`, `Couleur`, `Categorie`, `SousCategorie`, `Pratique`) VALUES (%(Nom)s, %(Marque)s, %(Prix)s, %(Couleur)s, %(Categorie)s, %(SousCategorie)s, %(Pratique)s)]
+[parameters: {'Nom': 'TestProduit', 'Marque': 'Picture', 'Prix': 10.99, 'Couleur': 'noir', 'Categorie': 'Vêtements', 'SousCategorie': 'Veste', 'Pratique': 'Randonnée'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-15 14:30:07,533 - ERROR - Erreur lors de la création du produit: (pymysql.err.OperationalError) (1364, "Field 'ProduitID' doesn't have a default value")
+[SQL: INSERT INTO produits (`Nom`, `Marque`, `Prix`, `Couleur`, `Categorie`, `SousCategorie`, `Pratique`) VALUES (%(Nom)s, %(Marque)s, %(Prix)s, %(Couleur)s, %(Categorie)s, %(SousCategorie)s, %(Pratique)s)]
+[parameters: {'Nom': 'Test', 'Marque': 'Picture', 'Prix': 10.0, 'Couleur': 'noir', 'Categorie': 'Vêtements', 'SousCategorie': 'Veste', 'Pratique': 'Randonnée'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-15 14:50:43,368 - ERROR - Erreur lors de la création du produit: 'ProduitCreate' object has no attribute 'ProduitID'
+2025-10-15 14:55:28,189 - INFO - Ajout produit 641 : Test
+2025-10-15 14:58:23,811 - INFO - Produits listés avec succès

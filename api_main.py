@@ -1,10 +1,41 @@
-from typing import List, Optional
+from typing import Union, List, Optional
 from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from models import SessionLocal, Produit, Client, Vente
+from datetime import datetime
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+from fastapi import Security, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+# --- Configuration du logger ---
+os.makedirs("logs", exist_ok=True)
+log_file = "logs/api.log"
+
+handler = RotatingFileHandler(log_file, maxBytes=5000, backupCount=5)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+handler.setFormatter(formatter)
+logger = logging.getLogger("api_logger")
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 app = FastAPI(title = "Decathlon DataMarket API")
+
+# --- Protection des endpoints ---
+API_TOKEN = os.getenv("API_TOKEN")
+
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+    token = credentials.credentials
+    if token != API_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalide ou manquant",
+        )
 
 # Dépendance pour la session DB
 def get_db():
@@ -44,7 +75,7 @@ class ClientOut(ClientBase):
         from_attributes = True
         
 class VenteBase(BaseModel):
-    Date: str
+    Date: datetime
     ClientID: str
     ProduitID: int
     
@@ -67,15 +98,20 @@ def read_root():
     return {"message": "Bienvenue sur l’API Decathlon DataMarket"}
 
 # Lire tous les produits
-@app.get("/datamarket/products", response_model = List[ProduitOut])
+@app.get("/datamarket/products", response_model = List[ProduitOut], dependencies=[Depends(verify_token)])
 def get_products(db: Session = Depends(get_db)):
-    produits = db.query(Produit).all()
-    return produits
+    try:
+        produits = db.query(Produit).all()
+        logger.info(f"Produits listés avec succès")
+        return produits
+    except Exception as e:
+        logger.error(f"Aucun produit trouvé : {str(e)}")
+        raise
 
 # Lire un produit
-@app.get("/datamarket/products/{product_id}", response_model=ProduitOut)
+@app.get("/datamarket/products/{product_id}", response_model=ProduitOut, dependencies=[Depends(verify_token)])
 def get_product(product_id: int, db: Session = Depends(get_db)):
-    produit = db.query(Produit).filter(Produit.product_id == product_id).first()
+    produit = db.query(Produit).filter(Produit.ProduitID == product_id).first()
     if not produit:
         raise HTTPException(status_code=404, detail="Produit non trouvé")
     return produit
@@ -89,7 +125,7 @@ def get_clients(db: Session = Depends(get_db)):
 # Lire un client
 @app.get("/datamarket/clients/{client_id}", response_model=ClientOut)
 def get_client(client_id: int, db: Session = Depends(get_db)):
-    client = db.query(Client).filter(Client.client_id == client_id).first()
+    client = db.query(Client).filter(Client.ClientID == client_id).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client non trouvé")
     return client
@@ -103,7 +139,7 @@ def get_sales(db: Session = Depends(get_db)):
 # Lire une vente
 @app.get("/datamarket/ventes/{vente_id}", response_model=VenteOut)
 def get_sale(vente_id: int, db: Session = Depends(get_db)):
-    vente = db.query(Vente).filter(Vente.vente_id == vente_id).first()
+    vente = db.query(Vente).filter(Vente.VenteID == vente_id).first()
     if not vente:
         raise HTTPException(status_code=404, detail="Vente non trouvée")
     return vente
@@ -120,13 +156,18 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     return db_client
 
 # Créer un produit
-@app.post("/datamarket/products", response_model=ProduitOut)
+@app.post("/datamarket/products", response_model=ProduitOut, dependencies=[Depends(verify_token)])
 def create_product(produit: ProduitCreate, db: Session = Depends(get_db)):
-    db_produit = Produit(**produit.dict())
-    db.add(db_produit)
-    db.commit()
-    db.refresh(db_produit)
-    return db_produit
+    try:
+        db_produit = Produit(**produit.dict())
+        db.add(db_produit)
+        db.commit()
+        db.refresh(db_produit)
+        logger.info(f"Ajout produit {db_produit.ProduitID} : {db_produit.Nom}")
+        return db_produit
+    except Exception as e :
+        logger.error(f"Erreur lors de la création du produit: {str(e)}")
+        raise
 
 # Créer une vente
 @app.post("/datamarket/ventes", response_model=VenteOut)
@@ -140,7 +181,7 @@ def create_sale(vente: VenteCreate, db: Session = Depends(get_db)):
 # --> UPDATE <-- #
 
 # Mettre à jour un produit
-@app.put("/datamarket/products/{product_id}", response_model=ProduitOut)
+@app.put("/datamarket/products/{product_id}", response_model=ProduitOut, dependencies=[Depends(verify_token)])
 def update_product(product_id: int, updated_data: ProduitCreate, db: Session = Depends(get_db)):
     # On cherche le produit dans la base
     produit = db.query(Produit).filter(Produit.product_id == product_id).first()
@@ -158,7 +199,7 @@ def update_product(product_id: int, updated_data: ProduitCreate, db: Session = D
 # --> DELETE <-- #
 
 # Supprimer un produit
-@app.delete("/datamarket/products/{product_id}")
+@app.delete("/datamarket/products/{product_id}", dependencies=[Depends(verify_token)])
 def delete_product(product_id: int, db: Session = Depends(get_db)):
     produit = db.query(Produit).filter(Produit.product_id == product_id).first()
     if not produit:
